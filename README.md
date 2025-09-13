@@ -62,6 +62,13 @@ conda env create -f environment.yml
 conda activate tfuse
 pip install torch-scatter -f https://data.pyg.org/whl/torch-1.11.0+cu102.html
 pip install mmcv-full==1.5.3 -f https://download.openmmlab.com/mmcv/dist/cu102/torch1.11.0/index.html
+
+# Fix cuda version to be compatible with current RTX
+pip uninstall torch-scatter mmcv-full
+pip install torch-scatter -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
+pip install mmcv-full==1.5.3 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.11.0/index.html
+pip uninstall torch torchaudio torchvision
+pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
 ## Dataset and Training
@@ -107,6 +114,9 @@ A minimal example of running the training script on a single machine:
 ```Shell
 cd team_code_transfuser
 python train.py --batch_size 10 --logdir /path/to/logdir --root_dir /path/to/dataset_root/ --parallel_training 0
+
+# Customize command
+python train.py --batch_size 10 --logdir /fs/nexus-scratch/aliu1237/transfuser/logdir --root_dir /fs/nexus-scratch/aliu1237/transfuser/data --parallel_training 0
 ```
 The training script has many more useful features documented at the start of the main function. 
 One of them is parallel training. 
