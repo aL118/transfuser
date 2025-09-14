@@ -118,6 +118,7 @@ class MxCIFSiblingAttentionPairwise(nn.Module):
         qh, kh, vh = (t.permute(0, 1, 3, 2, 4).contiguous() for t in (q, k, v))  # [B,N,H,4,dh]
         scale = dh ** -0.5
 
+        ###################### torch.amp -> torch.cuda.amp ######################
         with torch.cuda.amp.autocast(enabled=False):
             qh32, kh32, vh32 = qh.float(), kh.float(), vh.float()
             scores = torch.einsum('bnhcd,bnhkd->bnhck', qh32, kh32) * scale  # [B,N,H,4,4]
@@ -229,7 +230,7 @@ class QuadtreeMixerCLS(nn.Module):
             for submodule in module.modules():
                 submodule.to(device)
         ############################################################
-        
+
         # synchronize current temperature to newly created modules
         for m in self.level_attn:
             m.set_temp(self._tau_attn)
