@@ -63,6 +63,13 @@ conda activate tfuse
 pip install torch-scatter -f https://data.pyg.org/whl/torch-1.11.0+cu102.html
 pip install mmcv-full==1.5.3 -f https://download.openmmlab.com/mmcv/dist/cu102/torch1.11.0/index.html
 
+# Alienware specific
+pip install torch-scatter==2.0.9 -f https://data.pyg.org/whl/torch-1.11.0+cpu.html
+rm /home/gamma/miniconda3/envs/tfuse/lib/libstdc++.so.6*
+ln -s /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /home/gamma/miniconda3/envs/tfuse/lib/libstdc++.so.6
+pip uninstall torch torchaudio torchvision
+pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
+
 # Fix cuda version to be compatible with current RTX
 pip uninstall torch-scatter mmcv-full
 pip install torch-scatter -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
@@ -153,12 +160,15 @@ rm model_ckpt/models_2022.zip
 To evaluate a model, we first launch a CARLA server:
 
 ```Shell
-./CarlaUE4.sh --world-port=2000 -opengl
+# ./CarlaUE4.sh --world-port=2000 -opengl
+./carla/CarlaUE4.sh --world-port=2000 -opengl -carla-world-port=2000 -quality-level=Low
 ```
 
 Once the CARLA server is running, evaluate an agent with the script:
 ```Shell
 ./leaderboard/scripts/local_evaluation.sh <carla root> <working directory of this repo (*/transfuser/)>
+# My command
+./leaderboard/scripts/local_evaluation.sh /home/gamma/Documents/transfuser/carla /home/gamma/Documents/transfuser
 ```
 
 By editing the arguments in `local_evaluation.sh`, we can benchmark performance on the Longest6 routes. You can evaluate both privileged agents (such as [autopilot.py]) and sensor-based models. To evaluate the sensor-based models use [submission_agent.py](./team_code_transfuser/submission_agent.py) as the `TEAM_AGENT` and point to the folder you downloaded the model weights into for the `TEAM_CONFIG`. The code is automatically configured to use the correct method based on the args.txt file in the model folder.
