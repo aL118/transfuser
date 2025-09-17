@@ -1,6 +1,7 @@
 **/carla
 **/logdir
 **/my_dump
+**/logdir_quadtree
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

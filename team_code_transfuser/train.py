@@ -30,6 +30,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--id', type=str, default='transfuser', help='Unique experiment identifier.')
     parser.add_argument('--epochs', type=int, default=41, help='Number of train epochs.')
+    parser.add_argument('--save_every', type=int, default=5, help='Save every n epochs.')
     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate.')
     parser.add_argument('--batch_size', type=int, default=12, help='Batch size for one GPU. When training with multiple GPUs the effective batch size will be batch_size*num_gpus')
     parser.add_argument('--logdir', type=str, default='log', help='Directory to log data to.')
@@ -46,7 +47,7 @@ def main():
     parser.add_argument('--schedule_reduce_epoch_02', type=int, default=40,
                         help='Epoch at which to reduce the lr by a factor of 10 the second time. Only used with --schedule 1')
     parser.add_argument('--backbone', type=str, default='transFuser',
-                        help='Which Fusion backbone to use. Options: transFuser, late_fusion, latentTF, geometric_fusion')
+                        help='Which Fusion backbone to use. Options: transFuser, late_fusion, latentTF, geometric_fusion, quadtree')
     parser.add_argument('--image_architecture', type=str, default='regnety_032',
                         help='Which architecture to use for the image branch. efficientnet_b0, resnet34, regnety_032 etc.')
     parser.add_argument('--lidar_architecture', type=str, default='regnety_032',
@@ -179,7 +180,7 @@ def main():
     if (not (args.load_file is None)):
         # Load checkpoint
         print("=============load=================")
-        model.load_state_dict(torch.load(args.load_file, map_location=model.device))
+        model.load_state_dict(torch.load(args.load_file, map_location=model.device), strict=False)
         optimizer.load_state_dict(torch.load(args.load_file.replace("model_", "optimizer_"), map_location=model.device))
 
 
@@ -206,7 +207,8 @@ def main():
             if (bool(args.zero_redundancy_optimizer) == True):
                 optimizer.consolidate_state_dict(0) # To save the whole optimizer we need to gather it on GPU 0.
             if (rank == 0):
-                trainer.save()
+                if epoch % args.save_every == 0 or epoch == args.epoch - 1:
+                    trainer.save()
         else:
             trainer.save()
 
@@ -270,7 +272,8 @@ class Engine(object):
 
         ego_vel = data['speed'].to(self.device, dtype=torch.float32)
 
-        if ((self.args.backbone == 'transFuser') or (self.args.backbone == 'late_fusion') or (self.args.backbone == 'latentTF')):
+        if ((self.args.backbone == 'transFuser') or (self.args.backbone == 'late_fusion') or (self.args.backbone == 'latentTF')
+          or (self.args.backbone == 'quadtree')):
             losses = self.model(rgb, lidar, ego_waypoint=ego_waypoint, target_point=target_point,
                            target_point_image=target_point_image,
                            ego_vel=ego_vel.reshape(-1, 1), bev=bev,

@@ -293,7 +293,7 @@ class HybridAgent(autonomous_agent.AutonomousAgent):
             bounding_boxes = []
             for i in range(self.model_count):
                 rotated_bb = []
-                if (self.backbone == 'transFuser'):
+                if (self.backbone == 'transFuser' or self.backbone == 'quadtree'):
                     pred_wp, _ = self.nets[i].forward_ego(image, lidar_bev, target_point, target_point_image, velocity,
                                                           num_points=num_points, save_path=SAVE_PATH, stuck_detector=self.stuck_detector,
                                                           forced_move=is_stuck, debug=self.config.debug, rgb_back=self.rgb_back)

@@ -4,6 +4,7 @@ import cv2
 
 from utils import *
 from transfuser import TransfuserBackbone, SegDecoder, DepthDecoder
+from transfuser_quadtree import TransfuserQuadtreeBackbone
 from geometric_fusion import GeometricFusionBackbone
 from late_fusion import LateFusionBackbone
 from latentTF import latentTFBackbone
@@ -560,8 +561,9 @@ class LidarCenterNet(nn.Module):
 
         self.backbone = backbone
 
-
-        if(backbone == 'transFuser'):
+        if(backbone == 'quadtree'):
+            self._model = TransfuserQuadtreeBackbone(config, image_architecture, lidar_architecture, use_velocity=use_velocity).to(self.device)
+        elif(backbone == 'transFuser'):
             self._model = TransfuserBackbone(config, image_architecture, lidar_architecture, use_velocity=use_velocity).to(self.device)
         elif(backbone == 'late_fusion'):
             self._model = LateFusionBackbone(config, image_architecture, lidar_architecture, use_velocity=use_velocity).to(self.device)

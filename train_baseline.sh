@@ -8,7 +8,7 @@
 
 ## Scale ntasks with gpus
 #SBATCH --mem=120gb                                               # memory required by job; if unit is not specified MB will be assumed
-#SBATCH --gres=gpu:rtxa5000:4
+#SBATCH --gres=gpu:rtxa6000:4
 #SBATCH --ntasks=16
 
 # set up notification settings for failures
@@ -34,10 +34,10 @@ NUM_GPUS=$(nvidia-smi --list-gpus | wc -l)
 
 echo "Number of GPUS: $NUM_GPUS"
 
-CUDA_VISIBLE_DEVICES=0,1 OMP_NUM_THREADS=16 OPENBLAS_NUM_THREADS=1 torchrun --nnodes=1 --nproc_per_node=2 --max_restarts=0 \
+CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=16 OPENBLAS_NUM_THREADS=1 torchrun --nnodes=1 --nproc_per_node=4 --max_restarts=0 \
  --rdzv_id=1234576890 --rdzv_backend=c10d /fs/nexus-scratch/aliu1237/transfuser/team_code_transfuser/train.py \
  --logdir /fs/nexus-scratch/aliu1237/transfuser/logdir --root_dir /fs/nexus-scratch/aliu1237/transfuser/data \
- --load_file /fs/nexus-scratch/aliu1237/transfuser/logdir/transfuser/model_10.pth \
- --parallel_training 1
+ --parallel_training 1 --batch_size 32 --save_every 10 --epochs 100
 
-## sbatch -J <job_name> <this_file>.sh
+## sbatch -J transfuser my_script8_2.sh
+## model_10 = epoch 29

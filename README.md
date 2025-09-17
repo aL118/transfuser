@@ -159,6 +159,9 @@ To evaluate a model, we first launch a CARLA server:
 Once the CARLA server is running, evaluate an agent with the script:
 ```Shell
 ./leaderboard/scripts/local_evaluation.sh <carla root> <working directory of this repo (*/transfuser/)>
+
+conda install -c conda-forge libjpeg-turbo=1.5.3
+./leaderboard/scripts/local_evaluation.sh /fs/nexus-scratch/aliu1237/transfuser/carla /fs/nexus-scratch/aliu1237/transfuser
 ```
 
 By editing the arguments in `local_evaluation.sh`, we can benchmark performance on the Longest6 routes. You can evaluate both privileged agents (such as [autopilot.py]) and sensor-based models. To evaluate the sensor-based models use [submission_agent.py](./team_code_transfuser/submission_agent.py) as the `TEAM_AGENT` and point to the folder you downloaded the model weights into for the `TEAM_CONFIG`. The code is automatically configured to use the correct method based on the args.txt file in the model folder.
