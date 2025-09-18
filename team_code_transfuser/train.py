@@ -182,6 +182,8 @@ def main():
         print("=============load=================")
         model.load_state_dict(torch.load(args.load_file, map_location=model.device), strict=False)
         optimizer.load_state_dict(torch.load(args.load_file.replace("model_", "optimizer_"), map_location=model.device))
+        args.start_epoch = int(args.load_file.split('model_')[1].split('.pth')[0]) + 1
+        print(f"Starting at model number: {args.start_epoch}")
 
 
     trainer = Engine(model=model, optimizer=optimizer, dataloader_train=dataloader_train, dataloader_val=dataloader_val,
@@ -207,7 +209,7 @@ def main():
             if (bool(args.zero_redundancy_optimizer) == True):
                 optimizer.consolidate_state_dict(0) # To save the whole optimizer we need to gather it on GPU 0.
             if (rank == 0):
-                if epoch % args.save_every == 0 or epoch == args.epoch - 1:
+                if (epoch + 1) % args.save_every == 0 or epoch == args.epochs - 1:
                     trainer.save()
         else:
             trainer.save()

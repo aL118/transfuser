@@ -694,7 +694,7 @@ class LidarCenterNet(nn.Module):
         if self.use_target_point_image:
             lidar_bev = torch.cat((lidar_bev, target_point_image), dim=1)
 
-        if (self.backbone == 'transFuser'):
+        if (self.backbone == 'transFuser' or self.backbone == 'quadtree'):
             features, image_features_grid, fused_features = self._model(rgb, lidar_bev, ego_vel)
         elif (self.backbone == 'late_fusion'):
             features, image_features_grid, fused_features = self._model(rgb, lidar_bev, ego_vel)
@@ -743,7 +743,7 @@ class LidarCenterNet(nn.Module):
         if self.use_target_point_image:
             lidar_bev = torch.cat((lidar_bev, target_point_image), dim=1)
 
-        if (self.backbone == 'transFuser'):
+        if (self.backbone == 'transFuser' or self.backbone == 'quadtree'):
             features, image_features_grid, fused_features = self._model(rgb, lidar_bev, ego_vel)
         elif (self.backbone == 'late_fusion'):
             features, image_features_grid, fused_features = self._model(rgb, lidar_bev, ego_vel)
