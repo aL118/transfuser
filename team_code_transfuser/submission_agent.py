@@ -20,7 +20,8 @@ from shapely.geometry import Polygon
 
 import itertools
 import pathlib
-SAVE_PATH = os.environ.get('SAVE_PATH')
+# SAVE_PATH = os.environ.get('SAVE_PATH')
+SAVE_PATH = "/home/gamma/Documents/transfuser/results/debug_output"
 
 if not SAVE_PATH:
     SAVE_PATH = None
@@ -93,7 +94,37 @@ class HybridAgent(autonomous_agent.AutonomousAgent):
                     net = torch.nn.SyncBatchNorm.convert_sync_batchnorm(net) # Model was trained with Sync. Batch Norm. Need to convert it otherwise parameters will load incorrectly.
                 state_dict = torch.load(os.path.join(path_to_conf_file, file), map_location='cuda:0')
                 state_dict = {k[7:]: v for k, v in state_dict.items()} # Removes the .module coming from the Distributed Training. Remove this if you want to evaluate a model trained without DDP.
+                # # Get parameter names and state_dict keys
+                # param_names = set(name for name, param in net.named_parameters() if param.requires_grad)
+                # state_dict_keys = set(state_dict.keys())
+                
+                # # Find discrepancies
+                # in_params_not_state = param_names - state_dict_keys
+                # in_state_not_params = state_dict_keys - param_names
+                
+                # # Save analysis to file
+                # with open('my_key_discrepancies.txt', 'w') as f:
+                #     f.write("=== KEY DISCREPANCIES ===\n")
+                #     f.write(f"Total named_parameters (requires_grad): {len(param_names)}\n")
+                #     f.write(f"Total state_dict keys: {len(state_dict_keys)}\n")
+                    
+                #     if in_params_not_state:
+                #         f.write(f"\nIn named_parameters but NOT in state_dict ({len(in_params_not_state)}):\n")
+                #         for name in sorted(in_params_not_state):
+                #             f.write(f"  - {name}\n")
+                    
+                #     if in_state_not_params:
+                #         f.write(f"\nIn state_dict but NOT in named_parameters ({len(in_state_not_params)}):\n")
+                #         for name in sorted(in_state_not_params):
+                #             f.write(f"  + {name}\n")
+                    
+                #     if not in_params_not_state and not in_state_not_params:
+                #         f.write("\nNo discrepancies found - all keys match!\n")
+                
+                # print(f"Key discrepancy analysis saved to key_discrepancies.txt")
+                # return
                 net.load_state_dict(state_dict, strict=False)
+                print('Model loaded successfully')
                 net.cuda()
                 net.eval()
                 self.nets.append(net)
@@ -293,7 +324,7 @@ class HybridAgent(autonomous_agent.AutonomousAgent):
             bounding_boxes = []
             for i in range(self.model_count):
                 rotated_bb = []
-                if (self.backbone == 'transFuser'):
+                if (self.backbone == 'transFuser' or self.backbone == 'quadtree'):
                     pred_wp, _ = self.nets[i].forward_ego(image, lidar_bev, target_point, target_point_image, velocity,
                                                           num_points=num_points, save_path=SAVE_PATH, stuck_detector=self.stuck_detector,
                                                           forced_move=is_stuck, debug=self.config.debug, rgb_back=self.rgb_back)
@@ -360,6 +391,13 @@ class HybridAgent(autonomous_agent.AutonomousAgent):
             safety_box      = safety_box[safety_box[..., 0] < self.config.safety_box_x_max]
 
         steer, throttle, brake = self.nets[0].control_pid(self.pred_wp, gt_velocity, is_stuck)
+
+        ### debugging
+        # dummy_wps = torch.ones_like(self.pred_wp) * torch.arange(4)[None, :, None].to("cuda")*2
+        # dummy_wps[..., 1] = dummy_wps[..., 1] * 0
+        # print(dummy_wps)
+        # steer, throttle, brake = self.nets[0].control_pid(dummy_wps, gt_velocity, is_stuck)
+        ### debugging
         
         if is_stuck and self.forced_move==1: # no steer for initial frame when unblocking
             steer = 0.0
@@ -373,6 +411,10 @@ class HybridAgent(autonomous_agent.AutonomousAgent):
             self.stuck_detector = 0
             self.forced_move    = 0
 
+        print("steer: ", steer)
+        print("throttle: ", throttle)
+        print("brake: ", brake)
+        
         control = carla.VehicleControl()
         control.steer = float(steer)
         control.throttle = float(throttle)

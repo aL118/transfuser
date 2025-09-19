@@ -22,7 +22,8 @@ export TEAM_AGENT=${WORK_DIR}/team_code_transfuser/submission_agent.py
 # export CHECKPOINT_ENDPOINT=${WORK_DIR}/results/transfuser_autopilot.json
 # export TEAM_AGENT=${WORK_DIR}/team_code_autopilot/autopilot.py
 
-export TEAM_CONFIG=${WORK_DIR}/model_ckpt/custom_models
+export TEAM_CONFIG=${WORK_DIR}/model_ckpt/baseline
+# export TEAM_CONFIG=${WORK_DIR}/model_ckpt/models_2022/transfuser_seed1
 
 export DEBUG_CHALLENGE=0
 export RESUME=0

@@ -4,6 +4,7 @@ import cv2
 
 from utils import *
 from transfuser import TransfuserBackbone, SegDecoder, DepthDecoder
+from transfuser_quadtree import TransfuserQuadtreeBackbone
 from geometric_fusion import GeometricFusionBackbone
 from late_fusion import LateFusionBackbone
 from latentTF import latentTFBackbone
@@ -560,8 +561,9 @@ class LidarCenterNet(nn.Module):
 
         self.backbone = backbone
 
-
-        if(backbone == 'transFuser'):
+        if (backbone == 'quadtree'):
+            self._model = TransfuserQuadtreeBackbone(config, image_architecture, lidar_architecture, use_velocity=use_velocity).to(self.device)
+        elif(backbone == 'transFuser'):
             self._model = TransfuserBackbone(config, image_architecture, lidar_architecture, use_velocity=use_velocity).to(self.device)
         elif(backbone == 'late_fusion'):
             self._model = LateFusionBackbone(config, image_architecture, lidar_architecture, use_velocity=use_velocity).to(self.device)
@@ -663,11 +665,15 @@ class LidarCenterNet(nn.Module):
         if is_stuck:
             desired_speed = np.array(self.config.default_speed) # default speed of 14.4 km/h
 
-        brake = ((desired_speed < self.config.brake_speed) or ((speed / desired_speed) > self.config.brake_ratio))
+        # brake = ((desired_speed < self.config.brake_speed) or ((speed / desired_speed) > self.config.brake_ratio))
+        # brake = ((speed / desired_speed) > self.config.brake_ratio)
+        # brake = (desired_speed < self.config.brake_speed)
+        brake = False
 
         delta = np.clip(desired_speed - speed, 0.0, self.config.clip_delta)
         throttle = self.speed_controller.step(delta)
-        throttle = np.clip(throttle, 0.0, self.config.clip_throttle)
+        # throttle = np.clip(throttle, 0.0, self.config.clip_throttle)
+        throttle = np.clip(throttle, 0.0, self.config.clip_throttle * 2)
         throttle = throttle if not brake else 0.0
         aim = (waypoints[1] + waypoints[0]) / 2.0
         angle = np.degrees(np.arctan2(aim[1], aim[0])) / 90.0
@@ -692,7 +698,7 @@ class LidarCenterNet(nn.Module):
         if self.use_target_point_image:
             lidar_bev = torch.cat((lidar_bev, target_point_image), dim=1)
 
-        if (self.backbone == 'transFuser'):
+        if (self.backbone == 'transFuser' or self.backbone == 'quadtree'):
             features, image_features_grid, fused_features = self._model(rgb, lidar_bev, ego_vel)
         elif (self.backbone == 'late_fusion'):
             features, image_features_grid, fused_features = self._model(rgb, lidar_bev, ego_vel)
@@ -704,7 +710,7 @@ class LidarCenterNet(nn.Module):
             raise ("The chosen vision backbone does not exist. The options are: transFuser, late_fusion, geometric_fusion, latentTF")
 
         pred_wp, _, _, _, _ = self.forward_gru(fused_features, target_point)
-
+                
         preds = self.head([features[0]])
         results = self.head.get_bboxes(preds[0], preds[1], preds[2], preds[3], preds[4], preds[5], preds[6])
         bboxes, _ = results[0]

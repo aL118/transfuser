@@ -10,31 +10,21 @@ export SCENARIO_RUNNER_ROOT=${WORK_DIR}/scenario_runner
 export LEADERBOARD_ROOT=${WORK_DIR}/leaderboard
 export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla/":"${SCENARIO_RUNNER_ROOT}":"${LEADERBOARD_ROOT}":${PYTHONPATH}
 
-export SCENARIOS=${WORK_DIR}/leaderboard/data/neat/eval_scenarios.json
-export ROUTES=${WORK_DIR}/leaderboard/data/neat/eval_routes.xml
+export SCENARIOS=${WORK_DIR}/leaderboard/data/longest6/eval_scenarios.json
+export ROUTES=${WORK_DIR}/leaderboard/data/longest6/longest6.xml
 export REPETITIONS=1
 
 export CHALLENGE_TRACK_CODENAME=SENSORS
-# export CHECKPOINT_ENDPOINT=${WORK_DIR}/results/transfuser_longest6.json
-export CHECKPOINT_ENDPOINT=${WORK_DIR}/results/transfuser_neat.json
+export CHECKPOINT_ENDPOINT=${WORK_DIR}/results/transfuser_longest6.json
 export TEAM_AGENT=${WORK_DIR}/team_code_transfuser/submission_agent.py
 # export CHALLENGE_TRACK_CODENAME=MAP
 # export CHECKPOINT_ENDPOINT=${WORK_DIR}/results/transfuser_autopilot.json
 # export TEAM_AGENT=${WORK_DIR}/team_code_autopilot/autopilot.py
 
-export TEAM_CONFIG=${WORK_DIR}/model_ckpt/custom_models
+export TEAM_CONFIG=${WORK_DIR}/model_ckpt/baseline
 
 export DEBUG_CHALLENGE=0
 export RESUME=0
 export DATAGEN=0
 
-python3 ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator_local.py \
---scenarios=${SCENARIOS}  \
---routes=${ROUTES} \
---repetitions=${REPETITIONS} \
---track=${CHALLENGE_TRACK_CODENAME} \
---checkpoint=${CHECKPOINT_ENDPOINT} \
---agent=${TEAM_AGENT} \
---agent-config=${TEAM_CONFIG} \
---debug=${DEBUG_CHALLENGE} \
---resume=${RESUME} \
+python image_peek.py

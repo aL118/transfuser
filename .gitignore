@@ -1,6 +1,8 @@
 **/carla
 **/logdir
 **/my_dump
+model_*.pth
+*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
