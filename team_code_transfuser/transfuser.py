@@ -3,7 +3,6 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 import timm
-from quadtree_sibling_transfuser import QuadtreeMixerCLS
 
 class TransfuserBackbone(nn.Module):
     """
@@ -535,14 +534,7 @@ class Block(nn.Module):
         super().__init__()
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
-        self.dim = 14
         self.attn = SelfAttention(n_embd, n_head, attn_pdrop, resid_pdrop)
-        # self.attn = QuadtreeMixerCLS(
-        #     d_model=n_embd,
-        #     n_heads=n_head,
-        #     patch_hw=(self.dim, self.dim),  # Pad to 196 tokens, by default Lpatch=174
-        #     prefix_tokens=0,  # No CLS token in TransFuser
-        # )
         self.mlp = nn.Sequential(
             nn.Linear(n_embd, block_exp * n_embd),
             nn.ReLU(True), # changed from GELU
@@ -555,15 +547,3 @@ class Block(nn.Module):
         x = x + self.mlp(self.ln2(x))
 
         return x
-    
-    # def forward(self, x):
-    #     B, L, D = x.shape
-
-    #     target_size = self.dim ** 2
-    #     padding_size = target_size - L
-    #     padding = torch.zeros(B, padding_size, D, device=x.device, dtype=x.dtype)
-    #     x_padded = torch.cat([x, padding], dim=1)
-    #     attn_out = self.attn(self.ln1(x_padded))
-    #     x = x + attn_out[:, :L, :]  # Remove padding and apply residual
-    #     x = x + self.mlp(self.ln2(x))
-    #     return x

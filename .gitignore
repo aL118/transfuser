@@ -2,6 +2,8 @@
 **/logdir
 **/my_dump
 **/logdir_quadtree
+model_*.pth
+*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

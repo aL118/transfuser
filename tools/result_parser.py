@@ -141,9 +141,10 @@ def main():
         with open(f) as json_file:
             evaluation_data = json.load(json_file)
 
-            if(len(total_infractions) == 0):
-                for infraction_name in evaluation_data['_checkpoint']['global_record']['infractions']:
-                    total_infractions[infraction_name] = 0
+            if 'infractions' in evaluation_data['_checkpoint']['global_record']:
+                if(len(total_infractions) == 0):
+                    for infraction_name in evaluation_data['_checkpoint']['global_record']['infractions']:
+                        total_infractions[infraction_name] = 0
 
             for record in evaluation_data['_checkpoint']['records']:
                 if(record['scores']['score_route'] <= 0.00000000001 ):
@@ -163,15 +164,16 @@ def main():
                 driven_km = percentage_of_route_completed * route_length_km
                 total_km_driven += driven_km
 
-                for infraction_name in evaluation_data['_checkpoint']['global_record']['infractions']:
-                    if(infraction_name == 'outside_route_lanes'):
-                        if(len(record['infractions'][infraction_name]) > 0):
-                            meters_off_road = re.findall("\d+\.\d+", record['infractions'][infraction_name][0])[0]
-                            km_off_road = float(meters_off_road) / 1000.0
-                            total_infractions[infraction_name] += km_off_road
-                    else:
-                        num_infraction = len(record['infractions'][infraction_name])
-                        total_infractions[infraction_name] += num_infraction
+                if 'infractions' in evaluation_data['_checkpoint']['global_record']:
+                    for infraction_name in evaluation_data['_checkpoint']['global_record']['infractions']:
+                        if(infraction_name == 'outside_route_lanes'):
+                            if(len(record['infractions'][infraction_name]) > 0):
+                                meters_off_road = re.findall("\d+\.\d+", record['infractions'][infraction_name][0])[0]
+                                km_off_road = float(meters_off_road) / 1000.0
+                                total_infractions[infraction_name] += km_off_road
+                        else:
+                            num_infraction = len(record['infractions'][infraction_name])
+                            total_infractions[infraction_name] += num_infraction
 
 
             eval_data = evaluation_data['_checkpoint']['records']
@@ -192,8 +194,8 @@ def main():
         print("Error: The number of completed routes (" + str(len(route_evaluation)) + ") is not a multiple of the total routes (" + str(len(route_matching)) + "). Check if there are missing results. Aborting.", file=sys.stderr)
         abort = True
 
-    if(abort == True):
-        exit()
+    # if(abort == True):
+    #     exit()
 
     total_score_values = total_score_values.sum(axis=0)/len(route_evaluation)
 

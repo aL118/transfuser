@@ -67,7 +67,7 @@ prometheus-client==0.7.1
 promise==2.3
 prompt-toolkit==3.0.5
 protobuf==3.11.3
-psutil==5.7.0
+psutil# ==5.7.0 # problem here
 ptyprocess==0.6.0
 py-trees==0.8.3
 pyasn1==0.4.8
