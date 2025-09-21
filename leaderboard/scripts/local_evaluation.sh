@@ -24,7 +24,7 @@ export RESUME=0
 export DATAGEN=0
 export PORT=2000
 
-export SAVE_PATH="$WORK_DIR/debug_output" # uncomment for debug output
+# export SAVE_PATH="$WORK_DIR/debug_output" # uncomment for debug output
 
 # Cleanup function with progress
 cleanup() {
@@ -72,7 +72,7 @@ echo "CARLA started with PID: $CARLA_PID"
 sleep 15
 
 # Run evaluator in background to capture its PID
-python3 ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator_local.py \
+python -u ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator_local.py \
 --scenarios=${SCENARIOS}  \
 --routes=${ROUTES} \
 --repetitions=${REPETITIONS} \
