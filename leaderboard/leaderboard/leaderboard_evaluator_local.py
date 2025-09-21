@@ -399,6 +399,10 @@ class LeaderboardEvaluator(object):
         if args.resume:
             route_indexer.resume(args.checkpoint)
             self.statistics_manager.resume(args.checkpoint)
+        elif args.start_scenario > 0:
+            route_indexer._index = args.start_scenario  # Set starting index
+            self.statistics_manager.clear_record(args.checkpoint)
+            route_indexer.save_state(args.checkpoint)
         else:
             self.statistics_manager.clear_record(args.checkpoint)
             route_indexer.save_state(args.checkpoint)
@@ -457,8 +461,9 @@ def main():
     parser.add_argument("--checkpoint", type=str,
                         default='./simulation_results.json',
                         help="Path to checkpoint used for saving statistics and resuming")
-
+    parser.add_argument('--start-scenario', type=int, default=0, help='Index of scenario to start from (0-based)')
     arguments = parser.parse_args()
+    arguments.resume = False
 
     statistics_manager = StatisticsManager()
 

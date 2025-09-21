@@ -534,7 +534,6 @@ class Block(nn.Module):
         super().__init__()
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
-        self.dim = 14
         self.attn = SelfAttention(n_embd, n_head, attn_pdrop, resid_pdrop)
         self.mlp = nn.Sequential(
             nn.Linear(n_embd, block_exp * n_embd),

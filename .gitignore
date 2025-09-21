@@ -4,6 +4,8 @@
 **/logdir_quadtree
 **/scratch
 **/scratch2
+model_*.pth
+*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
