@@ -64,6 +64,8 @@ trap cleanup SIGINT SIGTERM
 
 echo "🚀 Starting CARLA evaluation (Press Ctrl+C to stop cleanly)"
 
+mkdir -p $WORK_DIR/logs 
+
 # Start CARLA
 DISPLAY= ${CARLA_ROOT}/CarlaUE4.sh -opengl -carla-port=${PORT} -fps=20 -nosound > $WORK_DIR/logs/carla.log 2>&1 & 
 CARLA_PID=$!
