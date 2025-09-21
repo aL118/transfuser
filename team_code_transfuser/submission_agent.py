@@ -20,8 +20,7 @@ from shapely.geometry import Polygon
 
 import itertools
 import pathlib
-# SAVE_PATH = os.environ.get('SAVE_PATH')
-SAVE_PATH = "/home/gamma/Documents/transfuser/results/debug_output"
+SAVE_PATH = os.environ.get('SAVE_PATH')
 
 if not SAVE_PATH:
     SAVE_PATH = None

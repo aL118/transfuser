@@ -6,6 +6,7 @@
 **/scratch2
 model_*.pth
 *.txt
+models/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

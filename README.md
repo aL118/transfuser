@@ -178,6 +178,10 @@ conda install -c conda-forge libjpeg-turbo=1.5.3
 ./leaderboard/scripts/local_evaluation.sh /home/gamma/Documents/transfuser/carla /home/gamma/Documents/transfuser
 ./leaderboard/scripts/local_evaluation_baseline.sh
 # Fix import or server errors
+
+# Nexus
+./leaderboard/scripts/local_evaluation.sh /fs/nexus-projects/sim2real/lyzheng/transfuser/carla /fs/nexus-projects/sim2real/lyzheng/transfuser
+
 pkill -9 python
 ```
 
