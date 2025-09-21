@@ -2,6 +2,8 @@
 **/logdir
 **/my_dump
 **/logdir_quadtree
+**/scratch
+**/scratch2
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

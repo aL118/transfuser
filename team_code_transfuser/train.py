@@ -31,6 +31,7 @@ def main():
     parser.add_argument('--id', type=str, default='transfuser', help='Unique experiment identifier.')
     parser.add_argument('--epochs', type=int, default=41, help='Number of train epochs.')
     parser.add_argument('--save_every', type=int, default=5, help='Save every n epochs.')
+    parser.add_argument('--prefix', type=str, default='', help='Model prefix.')
     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate.')
     parser.add_argument('--batch_size', type=int, default=12, help='Batch size for one GPU. When training with multiple GPUs the effective batch size will be batch_size*num_gpus')
     parser.add_argument('--logdir', type=str, default='log', help='Directory to log data to.')
@@ -182,7 +183,7 @@ def main():
         print("=============load=================")
         model.load_state_dict(torch.load(args.load_file, map_location=model.device), strict=False)
         optimizer.load_state_dict(torch.load(args.load_file.replace("model_", "optimizer_"), map_location=model.device))
-        args.start_epoch = int(args.load_file.split('model_')[1].split('.pth')[0]) + 1
+        args.start_epoch = int(args.load_file.split('model_')[1].split('.pth')[0])
         print(f"Starting at model number: {args.start_epoch}")
 
 
@@ -385,8 +386,8 @@ class Engine(object):
 
     def save(self):
         # NOTE saving the model with torch.save(model.module.state_dict(), PATH) if parallel processing is used would be cleaner, we keep it for backwards compatibility
-        torch.save(self.model.state_dict(), os.path.join(self.args.logdir, 'model_%d.pth' % self.cur_epoch))
-        torch.save(self.optimizer.state_dict(), os.path.join(self.args.logdir, 'optimizer_%d.pth' % self.cur_epoch))
+        torch.save(self.model.state_dict(), os.path.join(self.args.logdir, f'{self.args.prefix}model_%d.pth' % self.cur_epoch))
+        torch.save(self.optimizer.state_dict(), os.path.join(self.args.logdir, f'{self.args.prefix}optimizer_%d.pth' % self.cur_epoch))
 
 # We need to seed the workers individually otherwise random processes in the dataloader return the same values across workers!
 def seed_worker(worker_id):

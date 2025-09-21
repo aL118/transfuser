@@ -154,6 +154,7 @@ To evaluate a model, we first launch a CARLA server:
 
 ```Shell
 ./CarlaUE4.sh --world-port=2000 -opengl
+DISPLAY= ./carla/CarlaUE4.sh --world-port=2000 -opengl -carla-world-port=2000 -quality-level=Low
 ```
 
 Once the CARLA server is running, evaluate an agent with the script:

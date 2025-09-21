@@ -8,7 +8,7 @@
 
 ## Scale ntasks with gpus
 #SBATCH --mem=120gb                                               # memory required by job; if unit is not specified MB will be assumed
-#SBATCH --gres=gpu:rtxa6000:4
+#SBATCH --gres=gpu:rtxa6000
 #SBATCH --ntasks=16
 
 # set up notification settings for failures

@@ -22,7 +22,7 @@
 ##SBATCH --partition=scavenger
 
 ## GAMMA training config
-#SBATCH --time=20:00:00     
+#SBATCH --time=48:00:00     
 #SBATCH --qos=huge-long                                    
 #SBATCH --account=gamma
 #SBATCH --partition=gamma
@@ -37,7 +37,8 @@ echo "Number of GPUS: $NUM_GPUS"
 CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=16 OPENBLAS_NUM_THREADS=1 torchrun --nnodes=1 --nproc_per_node=4 --max_restarts=0 \
  --rdzv_id=1234576890 --rdzv_backend=c10d /fs/nexus-scratch/aliu1237/transfuser/team_code_transfuser/train.py \
  --logdir /fs/nexus-scratch/aliu1237/transfuser/logdir --root_dir /fs/nexus-scratch/aliu1237/transfuser/data \
+ --load_file /fs/nexus-scratch/aliu1237/transfuser/logdir/transfuser/model_31.pth \
  --parallel_training 1 --batch_size 32 --save_every 10 --epochs 100
 
-## sbatch -J transfuser my_script8_2.sh
+## sbatch -J tfuse2_baseline train_baseline.sh
 ## model_10 = epoch 29
