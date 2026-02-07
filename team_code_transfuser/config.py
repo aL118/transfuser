@@ -7,7 +7,7 @@ class GlobalConfig:
     # use different seq len for image and lidar
     img_seq_len = 1 
     lidar_seq_len = 1
-    pred_len = 4 # future waypoints predicted
+    pred_len = 8 # future waypoints predicted
     scale = 1 # image pre-processing
     img_resolution = (160, 704) # image pre-processing in H, W
     img_width = 320 # important this should be consistent with scale, e.g. scale = 1, img_width 320, scale=2, image_width 640

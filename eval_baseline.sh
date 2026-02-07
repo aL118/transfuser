@@ -8,8 +8,8 @@
 
 ## Scale ntasks with gpus
 #SBATCH --mem=120gb                                               # memory required by job; if unit is not specified MB will be assumed
-#SBATCH --gres=gpu:rtxa5000:4
-#SBATCH --ntasks=16
+#SBATCH --gres=gpu:rtxa6000:1
+#SBATCH --ntasks=4
 
 # set up notification settings for failures
 ##SBATCH --mail-user=angelaliu9805@gmail.com
@@ -22,7 +22,7 @@
 ##SBATCH --partition=scavenger
 
 ## GAMMA training config
-#SBATCH --time=20:00:00     
+#SBATCH --time=48:00:00     
 #SBATCH --qos=huge-long                                    
 #SBATCH --account=gamma
 #SBATCH --partition=gamma
@@ -34,10 +34,8 @@ NUM_GPUS=$(nvidia-smi --list-gpus | wc -l)
 
 echo "Number of GPUS: $NUM_GPUS"
 
-CUDA_VISIBLE_DEVICES=0,1 OMP_NUM_THREADS=16 OPENBLAS_NUM_THREADS=1 torchrun --nnodes=1 --nproc_per_node=2 --max_restarts=0 \
- --rdzv_id=1234576890 --rdzv_backend=c10d /fs/nexus-scratch/aliu1237/transfuser/team_code_transfuser/train.py \
- --logdir /fs/nexus-scratch/aliu1237/transfuser/logdir --root_dir /fs/nexus-scratch/aliu1237/transfuser/data \
- --load_file /fs/nexus-scratch/aliu1237/transfuser/logdir/transfuser/model_10.pth \
- --parallel_training 1
+bash /fs/nexus-scratch/aliu1237/transfuser/leaderboard/scripts/local_evaluation.sh
 
-## sbatch -J <job_name> <this_file>.sh
+## sbatch -J baseline_metrics data_collection/eval_baseline.sh
+## model_10 = epoch 29
+## /fs/nexus-projects/sim2real/

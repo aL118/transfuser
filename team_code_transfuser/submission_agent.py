@@ -12,6 +12,7 @@ import numpy as np
 import math
 
 from leaderboard.autoagents import autonomous_agent
+# from leaderboard.autoagents import autonomous_agent_local as autonomous_agent
 from model import LidarCenterNet
 from config import GlobalConfig
 from data import lidar_to_histogram_features, draw_target_point, lidar_bev_cam_correspondences
@@ -32,12 +33,15 @@ def get_entry_point():
 
 
 class HybridAgent(autonomous_agent.AutonomousAgent):
+    def __init__(self, path_to_conf_file, route_index=None):
+        super(HybridAgent, self).__init__(path_to_conf_file, route_index)
+
     def setup(self, path_to_conf_file, route_index=None):
         self.track = autonomous_agent.Track.SENSORS
         self.config_path = path_to_conf_file
         self.step = -1
         self.initialized = False
-
+        print("Route index is: ", self.route_index)
         args_file = open(os.path.join(path_to_conf_file, 'args.txt'), 'r')
         self.args = json.load(args_file)
         args_file.close()
@@ -324,8 +328,16 @@ class HybridAgent(autonomous_agent.AutonomousAgent):
             for i in range(self.model_count):
                 rotated_bb = []
                 if (self.backbone == 'transFuser' or self.backbone == 'quadtree'):
+                    # Create scenario-specific save path
+                    scenario_save_path = None
+                    if SAVE_PATH is not None and self.route_index is not None:
+                        scenario_save_path = os.path.join(SAVE_PATH, f"scenario_{self.route_index}")
+                        pathlib.Path(scenario_save_path).mkdir(parents=True, exist_ok=True)
+                    elif SAVE_PATH is not None:
+                        scenario_save_path = SAVE_PATH
+
                     pred_wp, _ = self.nets[i].forward_ego(image, lidar_bev, target_point, target_point_image, velocity,
-                                                          num_points=num_points, save_path=SAVE_PATH, stuck_detector=self.stuck_detector,
+                                                          num_points=num_points, save_path=scenario_save_path, stuck_detector=self.stuck_detector,
                                                           forced_move=is_stuck, debug=self.config.debug, rgb_back=self.rgb_back)
                 elif (self.backbone == 'late_fusion'):
                     pred_wp, _ = self.nets[i].forward_ego(image, lidar_bev, target_point, target_point_image, velocity, num_points=num_points)

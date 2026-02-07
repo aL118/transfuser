@@ -197,6 +197,8 @@ def main():
     # if(abort == True):
     #     exit()
 
+    # total_score_values = np.array(total_score_values).sum(axis=0)/len(route_evaluation)
+    print(len(route_evaluation))
     total_score_values = total_score_values.sum(axis=0)/len(route_evaluation)
 
     for idx, value in enumerate(total_score_labels):

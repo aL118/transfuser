@@ -257,6 +257,12 @@ class LeaderboardEvaluator(object):
         print("> Setting up the agent\033[0m")
 
         # Prepare the statistics of the route
+        # Initialize registry for single scenario run
+        if len(self.statistics_manager._registry_route_records) <= config.index:
+            # Extend registry to accommodate the target index
+            while len(self.statistics_manager._registry_route_records) <= config.index:
+                self.statistics_manager._registry_route_records.append(None)
+
         self.statistics_manager.set_route(config.name, config.index)
         if int(os.environ['DATAGEN'])==1:
             CarlaDataProvider._rng = random.RandomState(config.index)
@@ -399,9 +405,6 @@ class LeaderboardEvaluator(object):
         if args.resume:
             route_indexer.resume(args.checkpoint)
             self.statistics_manager.resume(args.checkpoint)
-            # Fix: Set index to number of completed scenarios
-            completed_scenarios = len(self.statistics_manager._registry_route_records)
-            route_indexer._index = completed_scenarios
         elif args.start_scenario > 0:
             route_indexer._index = args.start_scenario  # Set starting index
             self.statistics_manager.clear_record(args.checkpoint)
@@ -410,16 +413,13 @@ class LeaderboardEvaluator(object):
             self.statistics_manager.clear_record(args.checkpoint)
             route_indexer.save_state(args.checkpoint)
 
-        while route_indexer.peek():
-            print(route_indexer.index)
-            # setup
-            config = route_indexer.next()
-            # Fixed: index should match the current scenario index
-            index = config.index
-            # run
-            self._load_and_run_scenario(args, config, index)
+        route_indexer._index = int(args.scenario)  # Set to desired index
+        config = route_indexer.next() 
+        index = int(args.scenario)
+        # run
+        self._load_and_run_scenario(args, config, index)
 
-            route_indexer.save_state(args.checkpoint)
+        route_indexer.save_state(args.checkpoint)
 
         # save global statistics
         print("\033[1m> Registering the global statistics\033[0m")
@@ -434,6 +434,7 @@ def main():
     parser = argparse.ArgumentParser(description=description, formatter_class=RawTextHelpFormatter)
     parser.add_argument('--host', default='localhost',
                         help='IP of the host server (default: localhost)')
+    parser.add_argument('--scenario', default=0, help='Route scenario')
     parser.add_argument('--port', default='2000', help='TCP port to listen to (default: 2000)')
     parser.add_argument('--trafficManagerPort', default='8000',
                         help='Port to use for the TrafficManager (default: 8000)')
@@ -468,11 +469,11 @@ def main():
                         help="Path to checkpoint used for saving statistics and resuming")
     parser.add_argument('--start-scenario', type=int, default=0, help='Index of scenario to start from (0-based)')
     arguments = parser.parse_args()
+    arguments.resume = False
 
     statistics_manager = StatisticsManager()
 
     try:
-        print("=== Challenge Evaluation Client ===")
         leaderboard_evaluator = LeaderboardEvaluator(arguments, statistics_manager)
         leaderboard_evaluator.run(arguments)
 

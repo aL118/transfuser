@@ -1,3 +1,5 @@
+export SCENARIO=6
+
 export CARLA_ROOT="/fs/nexus-scratch/aliu1237/transfuser/carla"
 export WORK_DIR="/fs/nexus-scratch/aliu1237/transfuser"
 
@@ -14,17 +16,17 @@ export ROUTES=${WORK_DIR}/leaderboard/data/neat/eval_routes.xml
 export REPETITIONS=1
 
 export CHALLENGE_TRACK_CODENAME=SENSORS
-export CHECKPOINT_ENDPOINT=${WORK_DIR}/results/transfuser_neat.json
+export CHECKPOINT_ENDPOINT=${WORK_DIR}/results/transfuser${SCENARIO}_neat.json
 export TEAM_AGENT=${WORK_DIR}/team_code_transfuser/submission_agent.py
 
-export TEAM_CONFIG=${WORK_DIR}/pretrained_models/all_towns
+export TEAM_CONFIG=${WORK_DIR}/models/transfuser
 
 export DEBUG_CHALLENGE=0
-export RESUME=1
+export RESUME=0
 export DATAGEN=0
-export PORT=2000
+export PORT=2002
 
-export SAVE_PATH="$WORK_DIR/debug_output" # uncomment for debug output
+# export SAVE_PATH="$WORK_DIR/debug_output_baseline" # uncomment for debug output
 
 # Cleanup function with progress
 cleanup() {
@@ -47,7 +49,7 @@ cleanup() {
     
     # Nuclear option - kill all CARLA processes
     echo "🔥 Killing all CARLA processes..."
-    pkill -f -KILL CarlaUE4 2>/dev/null
+    # pkill -f -KILL CarlaUE4 2>/dev/null
     
     # Verify cleanup
     if pgrep -f CarlaUE4 > /dev/null; then
@@ -68,14 +70,14 @@ echo "Loading models in $TEAM_CONFIG"
 mkdir -p $WORK_DIR/logs 
 
 # Start CARLA
-DISPLAY= ${CARLA_ROOT}/CarlaUE4.sh -opengl -carla-port=${PORT} -fps=20 -nosound > $WORK_DIR/logs/carla.log 2>&1 & 
+DISPLAY= ${CARLA_ROOT}/CarlaUE4.sh -opengl -carla-port=${PORT} -fps=20 -nosound > $WORK_DIR/logs/carla2.log 2>&1 & 
 CARLA_PID=$!
 echo "CARLA started with PID: $CARLA_PID"
 
 sleep 15
 
 # Run evaluator in background to capture its PID
-python -u ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator_local.py \
+python -u ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator_local_patch.py \
 --scenarios=${SCENARIOS}  \
 --routes=${ROUTES} \
 --repetitions=${REPETITIONS} \
@@ -85,7 +87,8 @@ python -u ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator_local.py \
 --agent-config=${TEAM_CONFIG} \
 --debug=${DEBUG_CHALLENGE} \
 --port=${PORT} \
---resume=${RESUME} > $WORK_DIR/logs/evaluation.log 2>&1 &
+--scenario=${SCENARIO} \
+--resume=${RESUME} > $WORK_DIR/logs/evaluation2.log 2>&1 &
 
 EVALUATOR_PID=$!
 echo "Evaluator started with PID: $EVALUATOR_PID"

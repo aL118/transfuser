@@ -14,17 +14,17 @@ export ROUTES=${WORK_DIR}/leaderboard/data/neat/eval_routes.xml
 export REPETITIONS=1
 
 export CHALLENGE_TRACK_CODENAME=SENSORS
-export CHECKPOINT_ENDPOINT=${WORK_DIR}/results/transfuser_neat.json
+export CHECKPOINT_ENDPOINT=${WORK_DIR}/results/quadtree_neat.json
 export TEAM_AGENT=${WORK_DIR}/team_code_transfuser/submission_agent.py
 
-export TEAM_CONFIG=${WORK_DIR}/pretrained_models/all_towns
+export TEAM_CONFIG=${WORK_DIR}/models/quadtree
 
 export DEBUG_CHALLENGE=0
-export RESUME=1
+export RESUME=0
 export DATAGEN=0
-export PORT=2000
+export PORT=2001
 
-export SAVE_PATH="$WORK_DIR/debug_output" # uncomment for debug output
+export SAVE_PATH="$WORK_DIR/debug_output_quadtree" # uncomment for debug output
 
 # Cleanup function with progress
 cleanup() {
@@ -68,7 +68,7 @@ echo "Loading models in $TEAM_CONFIG"
 mkdir -p $WORK_DIR/logs 
 
 # Start CARLA
-DISPLAY= ${CARLA_ROOT}/CarlaUE4.sh -opengl -carla-port=${PORT} -fps=20 -nosound > $WORK_DIR/logs/carla.log 2>&1 & 
+DISPLAY= ${CARLA_ROOT}/CarlaUE4.sh -opengl -carla-port=${PORT} -fps=20 -nosound > $WORK_DIR/logs/carla_quadtree.log 2>&1 & 
 CARLA_PID=$!
 echo "CARLA started with PID: $CARLA_PID"
 
@@ -85,7 +85,7 @@ python -u ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator_local.py \
 --agent-config=${TEAM_CONFIG} \
 --debug=${DEBUG_CHALLENGE} \
 --port=${PORT} \
---resume=${RESUME} > $WORK_DIR/logs/evaluation.log 2>&1 &
+--resume=${RESUME} > $WORK_DIR/logs/evaluation_quadtree.log 2>&1 &
 
 EVALUATOR_PID=$!
 echo "Evaluator started with PID: $EVALUATOR_PID"

@@ -243,8 +243,8 @@ class StatisticsManager(object):
         stats_dict = route_record.__dict__
         record_list = data['_checkpoint']['records']
         if index > len(record_list):
-            print('Error! No enough entries in the list')
-            sys.exit(-1)
+            # Treat as scenario 0 when index is out of bounds
+            record_list.append(stats_dict)
         elif index == len(record_list):
             record_list.append(stats_dict)
         else:

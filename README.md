@@ -76,6 +76,7 @@ pip install torch-scatter -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
 pip install mmcv-full==1.5.3 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.11.0/index.html
 pip uninstall torch torchaudio torchvision
 pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
+conda install -c conda-forge ffmpeg -y
 ```
 
 ## Dataset and Training

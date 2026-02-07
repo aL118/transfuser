@@ -187,27 +187,27 @@ class QuadtreeMixerCLS(nn.Module):
 
         # Initialize level_attn modules immediately for the expected patch_hw
         # Remove if not needed
-        # if patch_hw is not None:
-        #     if isinstance(patch_hw, tuple):
-        #         H, W = int(patch_hw[0]), int(patch_hw[1])
-        #     elif isinstance(patch_hw, int):
-        #         H = W = int(patch_hw)
-        #     else:
-        #         H = W = 14  # default fallback
-        #     idx, msk = build_sibling_buffers(H, W)
-        #     L = idx.size(0)
-        #     L_use = L if levels is None else int(min(levels, L))
-        #     self.level_attn = nn.ModuleList([
-        #         MxCIFSiblingAttentionPairwise(d_model, n_heads, k_keep=k_keep)
-        #         for _ in range(L_use)
-        #     ])
-        #     # Set the buffers immediately
-        #     self.sib_idx = idx
-        #     self.sib_msk = msk
-        #     self._built_for = (H, W)
-        # else:
-        #     # per-level pairwise
-        #     self.level_attn = nn.ModuleList()
+        if patch_hw is not None:
+            if isinstance(patch_hw, tuple):
+                H, W = int(patch_hw[0]), int(patch_hw[1])
+            elif isinstance(patch_hw, int):
+                H = W = int(patch_hw)
+            else:
+                H = W = 14  # default fallback
+            idx, msk = build_sibling_buffers(H, W)
+            L = idx.size(0)
+            L_use = L if levels is None else int(min(levels, L))
+            self.level_attn = nn.ModuleList([
+                MxCIFSiblingAttentionPairwise(d_model, n_heads, k_keep=k_keep)
+                for _ in range(L_use)
+            ])
+            # Set the buffers immediately
+            self.sib_idx = idx
+            self.sib_msk = msk
+            self._built_for = (H, W)
+        else:
+            # per-level pairwise
+            self.level_attn = nn.ModuleList()
         #######################################
 
         # parent-bank weighted pooling

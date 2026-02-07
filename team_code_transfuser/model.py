@@ -923,6 +923,76 @@ class LidarCenterNet(nn.Module):
                 points_to_draw.append(point.copy())
                 point = point.astype(np.int32)
                 cv2.circle(image, tuple(point), radius=3, color=color, thickness=3)
+
+            # Draw trajectory line connecting waypoints and extend to image edges
+            # if len(points_to_draw) > 1:
+            #     self.draw_line("predicted_trajectory", points_to_draw[0], points_to_draw[1], image, color=color)
+        return image
+
+    def draw_line(self, label, waypoints, image, color=(255, 255, 255)):
+        """Draw a line that extends across the entire image using two waypoints to define the slope"""
+        waypoints = waypoints.detach().cpu().numpy()
+        label = label.detach().cpu().numpy()
+        points_to_draw = []
+        for bbox, points in zip(label, waypoints):
+            x, y, w, h, yaw, speed, brake =  bbox
+            c, s = np.cos(yaw), np.sin(yaw)
+            r1_to_world = np.array([[c, -s, x], [s, c, y], [0, 0, 1]])
+            points[:, 0] *= -1
+            points = points * self.config.pixels_per_meter
+            points = points[:, [1, 0]]
+            points = np.concatenate((points, np.ones_like(points[:, :1])), axis=-1)
+            points = r1_to_world @ points.T
+            points = points.T           
+            for point in points[:, :2]:
+                points_to_draw.append(point.copy())
+        
+        if len(points_to_draw) > 1:
+            pt1 = points_to_draw[0]
+            pt2 = points_to_draw[1]
+
+            # Calculate slope and extend line to image edges
+            dx = pt2[0] - pt1[0]
+            dy = pt2[1] - pt1[1]
+            h, w = image.shape[:2]
+
+            if abs(dx) > 1e-6:  # Avoid division by zero
+                # Calculate line equation: y = mx + b
+                slope = dy / dx
+                b = pt1[1] - slope * pt1[0]
+
+                # Find intersections with image boundaries
+                intersections = []
+
+                # Left edge (x = 0)
+                y_left = b
+                if 0 <= y_left <= h:
+                    intersections.append((0, int(y_left)))
+
+                # Right edge (x = w)
+                y_right = slope * w + b
+                if 0 <= y_right <= h:
+                    intersections.append((w, int(y_right)))
+
+                # Top edge (y = 0)
+                if abs(slope) > 1e-6:
+                    x_top = -b / slope
+                    if 0 <= x_top <= w:
+                        intersections.append((int(x_top), 0))
+
+                # Bottom edge (y = h)
+                if abs(slope) > 1e-6:
+                    x_bottom = (h - b) / slope
+                    if 0 <= x_bottom <= w:
+                        intersections.append((int(x_bottom), h))
+
+                # Draw line between the two intersection points
+                if len(intersections) >= 2:
+                    cv2.line(image, intersections[0], intersections[1], color, thickness=2)
+
+            else:  # Vertical line
+                cv2.line(image, (int(pt1[0]), 0), (int(pt1[0]), h), color, thickness=2)
+
         return image
 
 
@@ -985,8 +1055,9 @@ class LidarCenterNet(nn.Module):
         if not expert_waypoints is None:
             images = self.draw_waypoints(label[0], expert_waypoints[i:i+1], images, color=(0, 0, 255))
 
-        images = self.draw_waypoints(label[0], deepcopy(pred_wp[i:i + 1, 2:]), images, color=(255, 255, 255)) # Auxliary waypoints in white
+        images = self.draw_waypoints(label[0], deepcopy(pred_wp[i:i + 1, 2:8]), images, color=(255, 255, 255)) # Auxliary waypoints in white (6 waypoints)
         images = self.draw_waypoints(label[0], deepcopy(pred_wp[i:i + 1, :2]), images, color=(255, 0, 0))     # First two, relevant waypoints in blue
+        images = self.draw_line(label[0], deepcopy(pred_wp[i:i + 1, :2]), images, color=(255, 0, 0))
 
         # draw target points
         images = self.draw_target_point(target_point[i].detach().cpu().numpy(), images)
@@ -1008,8 +1079,9 @@ class LidarCenterNet(nn.Module):
         if not expert_waypoints is None:
             bev_image = self.draw_waypoints(label[0], expert_waypoints[i:i+1], bev_image, color=(0, 0, 255))
 
-        bev_image = self.draw_waypoints(label[0], deepcopy(pred_wp[i:i + 1, 2:]), bev_image, color=(255, 255, 255))
+        bev_image = self.draw_waypoints(label[0], deepcopy(pred_wp[i:i + 1, 2:8]), bev_image, color=(255, 255, 255))
         bev_image = self.draw_waypoints(label[0], deepcopy(pred_wp[i:i + 1, :2]), bev_image, color=(255, 0, 0))
+        bev_image = self.draw_line(label[0], deepcopy(pred_wp[i:i + 1, :2]), bev_image, color=(255, 0, 0))
 
         bev_image = self.draw_target_point(target_point[i].detach().cpu().numpy(), bev_image)
 
